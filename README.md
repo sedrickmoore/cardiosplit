@@ -1,19 +1,21 @@
 # CardioSplit Timer
 
-**CardioSplit Timer** is a customizable interval timer designed for running/walking routines. Built in React Native with Expo, it features audio and haptic feedback, visual cues, and lock protection to prevent accidental taps.
+**CardioSplit Timer** is a fully customizable interval timer for alternating between running and walking. Built in React Native with Expo, it includes visual countdowns, audio cues, vibration feedback, theme selection, persistent settings, and a lock system to prevent accidental taps.
 
 ---
 
 ## Features
 
 * **Custom Intervals:** Set total workout time, run time, and walk time.
-* **Pre-Start Countdown:** "Ready / Set / Go" phase with sound cues.
-* **Visual Timer:** Displays current interval type and countdown.
-* **Elapsed Time Display:** Tracks total time in-session.
-* **Audio Feedback:** Plays beeps for countdowns and switches.
-* **Vibration Cues:** Different buzz patterns for Run and Walk.
-* **Lock Protection:** Pause/Stop buttons are hidden unless unlocked with a long-press.
-* **Responsive Design:** Modern UI with color-coded states and shadows.
+* **Pre-Start Countdown:** A "Ready / Set / Go" intro sequence with sound cues.
+* **Live Timer:** Clearly displays current interval type and countdown.
+* **Elapsed Time Tracking:** Shows both total elapsed time and run-only time.
+* **Theme Customization:** Choose from multiple color themes (light, dark, and high-visibility).
+* **Persistent Settings:** Remembers your last-used theme and interval settings.
+* **Audio Feedback:** Beeps for interval switches and countdown warnings.
+* **Vibration Cues:** Custom buzz patterns for run and walk transitions.
+* **Accidental Tap Protection:** Lock/Unlock system prevents accidental presses.
+* **Responsive Layout:** Smooth transitions, shadows, and color-coded backgrounds for each phase (for main theme only).
 
 ---
 
@@ -54,12 +56,9 @@ eas build --platform android --profile preview
 
 ---
 
-## Planned Features
+## What's Next
 
-* Workout history saved to local storage (SQLite)
-* Sync to Google Fit
-* Visual animations for transitions and countdowns
-* Optional music player integration
+Additional features like Google Fit syncing, notification widgets, and background services will be explored in a future native (ejected) version of this app.
 
 ---
 
@@ -79,3 +78,9 @@ MIT License
 
 ### Walk Screen
 <img src="screenshots/walk-timer.png" alt="Walk Screen" width="300" />
+
+### Dark Theme
+<img src="screenshots/home-dark.png" alt="Dark Theme" width="300" />
+
+### High-Visibility Theme
+<img src="screenshots/home-light.png" alt="High-Visibility Theme" width="300" />
