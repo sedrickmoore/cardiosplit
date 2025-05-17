@@ -3,7 +3,7 @@ import { View, Text, TextInput, Button, StyleSheet, Vibration } from 'react-nati
 import { Audio } from 'expo-av';
 
 export default function App() {
-  const [totalTime, setTotalTime] = useState('1'); // minutes
+  const [totalTime, setTotalTime] = useState('30'); // minutes
   const [runTime, setRunTime] = useState('.2'); // minutes
   const [walkTime, setWalkTime] = useState('.2'); // minutes
   const [currentInterval, setCurrentInterval] = useState(null);
@@ -43,6 +43,10 @@ export default function App() {
   }, [currentInterval]);
 
   const playSound = async (soundFile) => {
+    if (soundRef.current) {
+      await soundRef.current.unloadAsync();
+      soundRef.current = null;
+    }
     const { sound } = await Audio.Sound.createAsync(soundFile);
     soundRef.current = sound;
     await sound.playAsync();
@@ -156,6 +160,14 @@ export default function App() {
   const resetTimer = () => {
     clearInterval(intervalRef.current);
     countdownTimersRef.current.forEach(clearTimeout);
+    // Ensure any playing sound is unloaded
+    (() => {
+      if (soundRef.current) {
+        soundRef.current.unloadAsync().then(() => {
+          soundRef.current = null;
+        });
+      }
+    })();
     setIsRunning(false);
     setIsPaused(false);
     setIsPrepping(false);
