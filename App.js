@@ -15,6 +15,7 @@ import {
 } from "expo-keep-awake";
 import { MaterialIcons } from "@expo/vector-icons";
 import * as Font from "expo-font";
+import { mainTheme, blackTheme, whiteTheme } from "./utils/themes";
 
 export default function App() {
   const [totalTime, setTotalTime] = useState("30"); // minutes
@@ -28,6 +29,7 @@ export default function App() {
   const [isPrepping, setIsPrepping] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  const [theme, setTheme] = useState(mainTheme);
   const intervalRef = useRef(null);
   const countdownTimersRef = useRef([]);
   const currentIntervalIndex = useRef(0);
@@ -252,10 +254,10 @@ export default function App() {
           paddingTop: !isRunning && !isPrepping ? 80 : 0,
           backgroundColor:
             isPaused || !isRunning
-              ? "#ffcccc" // soft red
+              ? theme.mainBG
               : currentInterval?.type === "Run"
-              ? "#ccffcc" // soft green
-              : "#fff8cc", // soft yellow
+              ? theme.runBG
+              : theme.walkBG,
         },
       ]}
     >
@@ -270,7 +272,7 @@ export default function App() {
               zIndex: 999,
             }}
           >
-            <MaterialIcons name="menu" size={48} color="#800000" />
+            <MaterialIcons name="menu" size={48} color={theme.iconMenu} />
           </TouchableOpacity>
           {showMenu && (
             <View
@@ -279,7 +281,7 @@ export default function App() {
                 top: 100,
                 left: 20,
                 right: 20,
-                backgroundColor: "#800000",
+                backgroundColor: theme.inputContainerBG,
                 padding: 20,
                 borderRadius: 12,
                 shadowColor: "#000",
@@ -291,59 +293,132 @@ export default function App() {
             >
               <Text
                 style={{
-                  fontFamily: "RajdhaniBold",
-                  fontSize: 24,
+                  fontFamily: theme.text,
+                  fontSize: 48,
                   marginBottom: 10,
-                  color: "#ffcccc"
+                  color: theme.labelText,
                 }}
               >
                 Select Theme
               </Text>
-              <TouchableOpacity onPress={() => alert("Set current theme")}>
-                <Text style={{ fontSize: 20, marginBottom: 10, color: "#ffcccc", fontFamily: "RajdhaniBold", }}>
-                  Maroon Theme (Current)
+              <TouchableOpacity
+                onPress={() => setTheme(mainTheme)}
+                style={{
+                  borderWidth: 8,
+                  borderColor: theme.labelText,
+                  borderRadius: 8,
+                  padding: 12,
+                  marginBottom: 10,
+                  shadowColor: "#000",
+                  shadowOpacity: 0.1,
+                  shadowRadius: 4,
+                  shadowOffset: { width: 0, height: 2 },
+                  elevation: 3,
+                  backgroundColor: theme.inputContainerBG,
+                }}
+              >
+                <Text style={{ fontSize: 40, color: theme.labelText, fontFamily: theme.text }}>
+                  Main Theme
                 </Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => alert("Set black theme")}>
-                <Text style={{ fontSize: 20, marginBottom: 10, color: "#ffcccc", fontFamily: "RajdhaniBold", }}>
-                  Black Theme (Dark Mode)
+              <TouchableOpacity
+                onPress={() => setTheme(blackTheme)}
+                style={{
+                  borderWidth: 8,
+                  borderColor: theme.labelText,
+                  borderRadius: 8,
+                  padding: 12,
+                  marginBottom: 10,
+                  shadowColor: "#000",
+                  shadowOpacity: 0.1,
+                  shadowRadius: 4,
+                  shadowOffset: { width: 0, height: 2 },
+                  elevation: 3,
+                  backgroundColor: theme.inputContainerBG,
+                }}
+              >
+                <Text style={{ fontSize: 40, color: theme.labelText, fontFamily: theme.text }}>
+                  Dark Mode
                 </Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => alert("Set white theme")}>
-                <Text style={{ fontSize: 20, color: "#ffcccc", fontFamily: "RajdhaniBold",}}>
-                  White Theme (High Visibility)
+              <TouchableOpacity
+                onPress={() => setTheme(whiteTheme)}
+                style={{
+                  borderWidth: 8,
+                  borderColor: theme.labelText,
+                  borderRadius: 8,
+                  padding: 12,
+                  marginBottom: 0,
+                  shadowColor: "#000",
+                  shadowOpacity: 0.1,
+                  shadowRadius: 4,
+                  shadowOffset: { width: 0, height: 2 },
+                  elevation: 3,
+                  backgroundColor: theme.inputContainerBG,
+                }}
+              >
+                <Text style={{ fontSize: 40, color: theme.labelText, fontFamily: theme.text }}>
+                  High Visibility
                 </Text>
               </TouchableOpacity>
             </View>
           )}
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Total Time (min)</Text>
+          <View style={[styles.inputContainer, { backgroundColor: theme.inputContainerBG }]}>
+            <Text style={[styles.label, { color: theme.labelText, fontFamily: theme.text }]}>Total Time (min)</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, {
+                backgroundColor: theme.inputBG,
+                borderColor: theme.inputBorder,
+                fontFamily: theme.text,
+                color:theme.inputText
+              }]}
               value={totalTime}
               onChangeText={setTotalTime}
               keyboardType="numeric"
             />
 
-            <Text style={styles.label}>Run Time (min)</Text>
+            <Text style={[styles.label, { color: theme.labelText, fontFamily: theme.text }]}>Run Time (min)</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, {
+                backgroundColor: theme.inputBG,
+                borderColor: theme.inputBorder,
+                fontFamily: theme.text,
+                color:theme.inputText
+              }]}
               value={runTime}
               onChangeText={setRunTime}
               keyboardType="numeric"
             />
 
-            <Text style={styles.label}>Walk Time (min)</Text>
+            <Text style={[styles.label, { color: theme.labelText, fontFamily: theme.text }]}>Walk Time (min)</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, {
+                backgroundColor: theme.inputBG,
+                borderColor: theme.inputBorder,
+                fontFamily: theme.text,
+                color:theme.inputText
+              }]}
               value={walkTime}
               onChangeText={setWalkTime}
               keyboardType="numeric"
             />
           </View>
           <View style={styles.centerContent}>
-            <TouchableOpacity style={styles.startButton} onPress={startTimer}>
-              <MaterialIcons name="play-arrow" size={64} color="#1B5E20" />
+            <TouchableOpacity
+              style={[
+                styles.startButton,
+                {
+                  backgroundColor: theme.startButtonBG,
+                  shadowColor: theme.buttonShadowColor,
+                  shadowOpacity: theme.buttonShadowOpacity,
+                  shadowRadius: theme.buttonShadowRadius,
+                  shadowOffset: theme.buttonShadowOffset,
+                  elevation: theme.buttonElevation,
+                },
+              ]}
+              onPress={startTimer}
+            >
+              <MaterialIcons name="play-arrow" size={64} color={theme.iconStart} />
             </TouchableOpacity>
           </View>
         </>
@@ -351,9 +426,9 @@ export default function App() {
 
       {(isRunning || isPrepping) && currentInterval && (
         <View style={styles.timerView}>
-          <Text style={styles.phaseText}>{currentInterval.type}</Text>
+          <Text style={[styles.phaseText, { fontFamily: theme.text, color: theme.textColor }]}>{currentInterval.type}</Text>
           {!isPrepping && (
-            <Text style={styles.timeText}>
+            <Text style={[styles.timeText, { fontFamily: theme.text, color: theme.textColor }]}>
               {Math.floor(secondsLeft / 60)}:
               {(secondsLeft % 60).toString().padStart(2, "0")}
             </Text>
@@ -366,36 +441,66 @@ export default function App() {
           {!isLocked && (
             <>
               <TouchableOpacity
-                style={[styles.controlButton, styles.pauseButton]}
+                style={[
+                  styles.controlButton,
+                  {
+                    backgroundColor: theme.pauseButtonBG,
+                    shadowColor: theme.buttonShadowColor,
+                    shadowOpacity: theme.buttonShadowOpacity,
+                    shadowRadius: theme.buttonShadowRadius,
+                    shadowOffset: theme.buttonShadowOffset,
+                    elevation: theme.buttonElevation,
+                  },
+                ]}
                 onPress={() => setIsPaused(!isPaused)}
               >
                 <MaterialIcons
                   name={isPaused ? "play-arrow" : "pause"}
                   size={64}
-                  color="#996700"
+                  color={theme.iconPause}
                 />
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={[styles.controlButton, styles.stopButton]}
+                style={[
+                  styles.controlButton,
+                  {
+                    backgroundColor: theme.stopButtonBG,
+                    shadowColor: theme.buttonShadowColor,
+                    shadowOpacity: theme.buttonShadowOpacity,
+                    shadowRadius: theme.buttonShadowRadius,
+                    shadowOffset: theme.buttonShadowOffset,
+                    elevation: theme.buttonElevation,
+                  },
+                ]}
                 onPress={resetTimer}
               >
-                <MaterialIcons name="stop" size={64} color="#8B0000" />
+                <MaterialIcons name="stop" size={64} color={theme.iconStop} />
               </TouchableOpacity>
             </>
           )}
           <TouchableOpacity
-            style={[styles.controlButton, { backgroundColor: "darkgoldenrod" }]}
+            style={[
+              styles.controlButton,
+              {
+                backgroundColor: theme.lockButtonBG,
+                shadowColor: theme.buttonShadowColor,
+                shadowOpacity: theme.buttonShadowOpacity,
+                shadowRadius: theme.buttonShadowRadius,
+                shadowOffset: theme.buttonShadowOffset,
+                elevation: theme.buttonElevation,
+              },
+            ]}
             onLongPress={() => setIsLocked(!isLocked)}
             delayLongPress={1000}
           >
             <MaterialIcons
               name={isLocked ? "lock" : "lock-open"}
               size={48}
-              color="black"
+              color={theme.iconLock}
             />
           </TouchableOpacity>
-          <Text style={styles.elapsedText}>
+          <Text style={[styles.elapsedText, { color: theme.textColor, fontFamily: theme.text }]}>
             {Math.floor(elapsedTime / 60)}:
             {(elapsedTime % 60).toString().padStart(2, "0")}
           </Text>
@@ -415,17 +520,13 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 42,
     marginTop: 10,
-    color: "#ffcccc",
     marginBottom: 15,
     textAlign: "center",
-    fontFamily: "RajdhaniBold",
   },
   inputContainer: {
-    backgroundColor: "#800000",
     padding: 20,
     borderRadius: 16,
     marginTop: 40,
-    shadowColor: "#000",
     shadowOpacity: 0.2,
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 6 },
@@ -436,16 +537,12 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: "#ccc",
     borderRadius: 10,
     padding: 10,
     fontSize: 42,
     marginBottom: 15,
-    backgroundColor: "#ffcccc",
     width: 180,
     textAlign: "center",
-    fontFamily: "RajdhaniBold",
-    shadowColor: "#000",
     shadowOpacity: 0.2,
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 4 },
@@ -457,23 +554,18 @@ const styles = StyleSheet.create({
   },
   phaseText: {
     fontSize: 72,
-    fontFamily: "RajdhaniBold",
   },
   timeText: {
     fontSize: 72,
     marginTop: 20,
-    fontFamily: "RajdhaniBold",
   },
   elapsedText: {
     fontSize: 72,
-    color: "#222",
-    fontFamily: "RajdhaniBold",
   },
   startButton: {
     width: "100%",
     height: 150,
     borderRadius: 16,
-    backgroundColor: "#81C784", // darker green
     justifyContent: "center",
     alignItems: "center",
     alignSelf: "center",
@@ -500,15 +592,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   pauseButton: {
-    backgroundColor: "#FFD54F", // darker yellow
   },
   stopButton: {
-    backgroundColor: "#EF9A9A", // darker red
   },
   controlButtonText: {
-    color: "white",
     fontSize: 18,
-    // fontWeight: 'bold',
-    fontFamily: "RajdhaniBold",
   },
 });
