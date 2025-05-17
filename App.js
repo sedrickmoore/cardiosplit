@@ -8,6 +8,7 @@ export default function App() {
   const [walkTime, setWalkTime] = useState('.2'); // minutes
   const [currentInterval, setCurrentInterval] = useState(null);
   const [secondsLeft, setSecondsLeft] = useState(0);
+  const [elapsedTime, setElapsedTime] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [isPrepping, setIsPrepping] = useState(false);
@@ -20,6 +21,7 @@ export default function App() {
 
   // Load transition sound
   const soundRef = useRef(null);
+  const silentAudio = useRef(null);
 
   const beep1 = require('./assets/beep1.mp3'); // switch to run
   const beep2 = require('./assets/beep2.mp3'); // countdown from walk
@@ -50,6 +52,26 @@ export default function App() {
     const { sound } = await Audio.Sound.createAsync(soundFile);
     soundRef.current = sound;
     await sound.playAsync();
+  };
+
+  const startSilentAudio = async () => {
+    const { sound } = await Audio.Sound.createAsync(
+      require('./assets/silence.mp3'),
+      {
+        isLooping: true,
+        shouldPlay: true,
+        volume: 0.0,
+      }
+    );
+    silentAudio.current = sound;
+    await sound.playAsync();
+  };
+
+  const stopSilentAudio = async () => {
+    if (silentAudio.current) {
+      await silentAudio.current.unloadAsync();
+      silentAudio.current = null;
+    }
   };
 
   const buildIntervals = (total, run, walk) => {
@@ -97,6 +119,7 @@ export default function App() {
 
     setTimeout(() => {
       setIsPrepping(false);
+      startSilentAudio();
       startMainTimer();
       playSound(beep1);
     }, 3000);
@@ -119,22 +142,30 @@ export default function App() {
         setIsRunning(false);
         return;
       }
-    
+
       const { type, duration } = intervals[currentIntervalIndex.current];
       setCurrentInterval({ type, duration });
-      setSecondsLeft(Math.round(duration)); // round in case of decimal seconds
+      currentIntervalRef.current = { type, duration };
+
+      // Trigger vibration immediately for new interval
+      if (type === 'Run') {
+        Vibration.vibrate([0, 500, 0, 500]); // single long buzz for run
+      } else if (type === 'Walk') {
+        Vibration.vibrate([0, 300, 100, 300]); // double buzz for walk
+      }
+
+      setSecondsLeft(Math.round(duration));
     };
-    
+
     runInterval();
-    
+
     intervalRef.current = setInterval(() => {
       if (isPausedRef.current) return;
-    
+
       setSecondsLeft((prev) => {
         const newTime = prev - 1;
-    
+
         if (newTime <= 0) {
-          Vibration.vibrate(300);
           const nextType = intervals[currentIntervalIndex.current + 1]?.type;
           if (nextType === 'Run') {
             playSound(beep1);
@@ -150,9 +181,10 @@ export default function App() {
             playSound(countdownBeep);
           }
         }
-    
+
         return newTime;
       });
+      setElapsedTime((et) => et + 1);
     }, 1000);
 
   };
@@ -168,10 +200,12 @@ export default function App() {
         });
       }
     })();
+    stopSilentAudio();
     setIsRunning(false);
     setIsPaused(false);
     setIsPrepping(false);
     setSecondsLeft(0);
+    setElapsedTime(0);
     setCurrentInterval(null);
     currentIntervalIndex.current = 0;
   };
@@ -196,7 +230,12 @@ export default function App() {
       {(isRunning || isPrepping) && currentInterval && (
         <View style={styles.timerView}>
           <Text style={styles.phaseText}>{currentInterval.type}</Text>
-          <Text style={styles.timeText}>{secondsLeft}s</Text>
+          <Text style={styles.timeText}>
+            {Math.floor(secondsLeft / 60)}:{(secondsLeft % 60).toString().padStart(2, '0')}
+          </Text>
+          <Text style={styles.elapsedText}>
+            Elapsed: {Math.floor(elapsedTime / 60)}:{(elapsedTime % 60).toString().padStart(2, '0')}
+          </Text>
         </View>
       )}
 
@@ -248,5 +287,10 @@ const styles = StyleSheet.create({
     fontSize: 48,
     fontWeight: 'bold',
     marginTop: 20,
+  },
+  elapsedText: {
+    fontSize: 20,
+    marginTop: 10,
+    color: 'gray',
   },
 });
