@@ -24,6 +24,7 @@ export default function App() {
   const [currentInterval, setCurrentInterval] = useState(null);
   const [secondsLeft, setSecondsLeft] = useState(0);
   const [elapsedTime, setElapsedTime] = useState(0);
+  const [runElapsedTime, setRunElapsedTime] = useState(0); // NEW STATE for total run time
   const [isRunning, setIsRunning] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [isPrepping, setIsPrepping] = useState(false);
@@ -221,7 +222,11 @@ export default function App() {
 
         return newTime;
       });
+      // INCREMENT elapsedTime always, and runElapsedTime only during "Run"
       setElapsedTime((et) => et + 1);
+      if (currentIntervalRef.current?.type === "Run") {
+        setRunElapsedTime((rt) => rt + 1);
+      }
     }, 1000);
   };
 
@@ -242,6 +247,7 @@ export default function App() {
     setIsPrepping(false);
     setSecondsLeft(0);
     setElapsedTime(0);
+    setRunElapsedTime(0);
     setCurrentInterval(null);
     currentIntervalIndex.current = 0;
   };
@@ -299,11 +305,13 @@ export default function App() {
                   width: "90%",
                   backgroundColor: theme.inputContainerBG,
                   padding: 20,
+                  paddingBottom: 38,
                   borderRadius: 12,
                   shadowColor: "#000",
                   shadowOpacity: 0.2,
                   shadowRadius: 10,
                   elevation: 10,
+                  gap: 22
                 }}
               >
                 <Text
@@ -319,7 +327,7 @@ export default function App() {
                 <TouchableOpacity
                   onPress={() => setTheme(mainTheme)}
                   style={{
-                    borderWidth: 8,
+                    borderWidth: 4,
                     borderColor: theme.labelText,
                     borderRadius: 8,
                     padding: 12,
@@ -339,7 +347,7 @@ export default function App() {
                 <TouchableOpacity
                   onPress={() => setTheme(blackTheme)}
                   style={{
-                    borderWidth: 8,
+                    borderWidth: 4,
                     borderColor: theme.labelText,
                     borderRadius: 8,
                     padding: 12,
@@ -359,7 +367,7 @@ export default function App() {
                 <TouchableOpacity
                   onPress={() => setTheme(whiteTheme)}
                   style={{
-                    borderWidth: 8,
+                    borderWidth: 4,
                     borderColor: theme.labelText,
                     borderRadius: 8,
                     padding: 12,
@@ -516,10 +524,11 @@ export default function App() {
               color={theme.iconLock}
             />
           </TouchableOpacity>
-          <Text style={[styles.elapsedText, { color: theme.textColor, fontFamily: theme.text }]}>
-            {Math.floor(elapsedTime / 60)}:
+          <Text style={[styles.elapsedText, { color: theme.textColor, fontFamily: theme.text, }]}>
+            {Math.floor(runElapsedTime / 60)}:{(runElapsedTime % 60).toString().padStart(2, "0")} / {Math.floor(elapsedTime / 60)}:
             {(elapsedTime % 60).toString().padStart(2, "0")}
           </Text>
+          
         </View>
       )}
     </View>
@@ -580,7 +589,7 @@ const styles = StyleSheet.create({
   },
   startButton: {
     width: "100%",
-    height: 150,
+    height: 125,
     borderRadius: 16,
     justifyContent: "center",
     alignItems: "center",
@@ -602,7 +611,7 @@ const styles = StyleSheet.create({
   },
   controlButton: {
     width: "100%",
-    height: 150,
+    height: 125,
     borderRadius: 16,
     justifyContent: "center",
     alignItems: "center",
