@@ -27,6 +27,7 @@ export default function App() {
   const [isPaused, setIsPaused] = useState(false);
   const [isPrepping, setIsPrepping] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
   const intervalRef = useRef(null);
   const countdownTimersRef = useRef([]);
   const currentIntervalIndex = useRef(0);
@@ -156,6 +157,7 @@ export default function App() {
   const startTimer = () => {
     if (isRunning || isPrepping) return; // prevent duplicate timers
     preStartCountdown();
+    setShowMenu(false)
   };
 
   const startMainTimer = () => {
@@ -243,7 +245,6 @@ export default function App() {
   };
 
   return (
-    
     <View
       style={[
         styles.container,
@@ -260,6 +261,61 @@ export default function App() {
     >
       {!isRunning && !isPrepping && (
         <>
+          <TouchableOpacity
+            onPress={() => setShowMenu(!showMenu)}
+            style={{
+              position: "absolute",
+              top: 50,
+              left: 20,
+              zIndex: 999,
+            }}
+          >
+            <MaterialIcons name="menu" size={48} color="#800000" />
+          </TouchableOpacity>
+          {showMenu && (
+            <View
+              style={{
+                position: "absolute",
+                top: 100,
+                left: 20,
+                right: 20,
+                backgroundColor: "#800000",
+                padding: 20,
+                borderRadius: 12,
+                shadowColor: "#000",
+                shadowOpacity: 0.2,
+                shadowRadius: 10,
+                elevation: 10,
+                zIndex: 999,
+              }}
+            >
+              <Text
+                style={{
+                  fontFamily: "RajdhaniBold",
+                  fontSize: 24,
+                  marginBottom: 10,
+                  color: "#ffcccc"
+                }}
+              >
+                Select Theme
+              </Text>
+              <TouchableOpacity onPress={() => alert("Set current theme")}>
+                <Text style={{ fontSize: 20, marginBottom: 10, color: "#ffcccc", fontFamily: "RajdhaniBold", }}>
+                  Maroon Theme (Current)
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => alert("Set black theme")}>
+                <Text style={{ fontSize: 20, marginBottom: 10, color: "#ffcccc", fontFamily: "RajdhaniBold", }}>
+                  Black Theme (Dark Mode)
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => alert("Set white theme")}>
+                <Text style={{ fontSize: 20, color: "#ffcccc", fontFamily: "RajdhaniBold",}}>
+                  White Theme (High Visibility)
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Total Time (min)</Text>
             <TextInput
@@ -389,7 +445,7 @@ const styles = StyleSheet.create({
     width: 180,
     textAlign: "center",
     fontFamily: "RajdhaniBold",
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOpacity: 0.2,
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 4 },
@@ -401,19 +457,15 @@ const styles = StyleSheet.create({
   },
   phaseText: {
     fontSize: 72,
-    // fontWeight: 'bold',
     fontFamily: "RajdhaniBold",
   },
   timeText: {
     fontSize: 72,
-    // fontWeight: 'bold',
     marginTop: 20,
     fontFamily: "RajdhaniBold",
   },
   elapsedText: {
     fontSize: 72,
-    // marginTop: 20,
-    // fontWeight: 'bold',
     color: "#222",
     fontFamily: "RajdhaniBold",
   },
@@ -425,11 +477,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     alignSelf: "center",
-  },
-  startButtonText: {
-    color: "white",
-    fontSize: 24,
-    fontWeight: "bold",
   },
   centerContent: {
     flex: 1,
