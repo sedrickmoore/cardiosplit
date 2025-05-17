@@ -525,47 +525,48 @@ export default function App() {
 
       {isRunning && (
         <View style={styles.controlButtonsContainer}>
-          {!isLocked && (
-            <>
-              <TouchableOpacity
-                style={[
-                  styles.controlButton,
-                  {
-                    backgroundColor: theme.pauseButtonBG,
-                    shadowColor: theme.buttonShadowColor,
-                    shadowOpacity: theme.buttonShadowOpacity,
-                    shadowRadius: theme.buttonShadowRadius,
-                    shadowOffset: theme.buttonShadowOffset,
-                    elevation: theme.buttonElevation,
-                  },
-                ]}
-                onPress={() => setIsPaused(!isPaused)}
-              >
-                <MaterialIcons
-                  name={isPaused ? "play-arrow" : "pause"}
-                  size={64}
-                  color={theme.iconPause}
-                />
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[
-                  styles.controlButton,
-                  {
-                    backgroundColor: theme.stopButtonBG,
-                    shadowColor: theme.buttonShadowColor,
-                    shadowOpacity: theme.buttonShadowOpacity,
-                    shadowRadius: theme.buttonShadowRadius,
-                    shadowOffset: theme.buttonShadowOffset,
-                    elevation: theme.buttonElevation,
-                  },
-                ]}
-                onPress={resetTimer}
-              >
-                <MaterialIcons name="stop" size={64} color={theme.iconStop} />
-              </TouchableOpacity>
-            </>
-          )}
+          <TouchableOpacity
+            style={[
+              styles.controlButton,
+              {
+                backgroundColor: theme.pauseButtonBG,
+                shadowColor: theme.buttonShadowColor,
+                shadowOpacity: theme.buttonShadowOpacity,
+                shadowRadius: theme.buttonShadowRadius,
+                shadowOffset: theme.buttonShadowOffset,
+                elevation: theme.buttonElevation,
+                marginBottom: 30,
+                opacity: isLocked ? 0.3 : 1,
+              },
+            ]}
+            onPress={() => !isLocked && setIsPaused(!isPaused)}
+            disabled={isLocked}
+          >
+            <MaterialIcons
+              name={isPaused ? "play-arrow" : "pause"}
+              size={64}
+              color={theme.iconPause}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.controlButton,
+              {
+                backgroundColor: theme.stopButtonBG,
+                shadowColor: theme.buttonShadowColor,
+                shadowOpacity: theme.buttonShadowOpacity,
+                shadowRadius: theme.buttonShadowRadius,
+                shadowOffset: theme.buttonShadowOffset,
+                elevation: theme.buttonElevation,
+                marginBottom: 30,
+                opacity: isLocked ? 0.3 : 1,
+              },
+            ]}
+            onPress={() => !isLocked && resetTimer()}
+            disabled={isLocked}
+          >
+            <MaterialIcons name="stop" size={64} color={theme.iconStop} />
+          </TouchableOpacity>
           <TouchableOpacity
             style={[
               styles.controlButton,
@@ -591,7 +592,6 @@ export default function App() {
             {Math.floor(runElapsedTime / 60)}:{(runElapsedTime % 60).toString().padStart(2, "0")} / {Math.floor(elapsedTime / 60)}:
             {(elapsedTime % 60).toString().padStart(2, "0")}
           </Text>
-          
         </View>
       )}
     </View>
