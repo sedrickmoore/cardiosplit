@@ -8,6 +8,7 @@ export default function App() {
   const [walkTime, setWalkTime] = useState('.2'); // minutes
   const [currentInterval, setCurrentInterval] = useState(null);
   const [secondsLeft, setSecondsLeft] = useState(0);
+  const [elapsedTime, setElapsedTime] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [isPrepping, setIsPrepping] = useState(false);
@@ -153,6 +154,7 @@ export default function App() {
     
         return newTime;
       });
+      setElapsedTime((et) => et + 1);
     }, 1000);
 
   };
@@ -172,6 +174,7 @@ export default function App() {
     setIsPaused(false);
     setIsPrepping(false);
     setSecondsLeft(0);
+    setElapsedTime(0);
     setCurrentInterval(null);
     currentIntervalIndex.current = 0;
   };
@@ -197,6 +200,9 @@ export default function App() {
         <View style={styles.timerView}>
           <Text style={styles.phaseText}>{currentInterval.type}</Text>
           <Text style={styles.timeText}>{secondsLeft}s</Text>
+          <Text style={styles.elapsedText}>
+            Elapsed: {Math.floor(elapsedTime / 60)}:{(elapsedTime % 60).toString().padStart(2, '0')}
+          </Text>
         </View>
       )}
 
@@ -248,5 +254,10 @@ const styles = StyleSheet.create({
     fontSize: 48,
     fontWeight: 'bold',
     marginTop: 20,
+  },
+  elapsedText: {
+    fontSize: 20,
+    marginTop: 10,
+    color: 'gray',
   },
 });
