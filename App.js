@@ -278,89 +278,105 @@ export default function App() {
             <View
               style={{
                 position: "absolute",
-                top: 100,
-                left: 20,
-                right: 20,
-                backgroundColor: theme.inputContainerBG,
-                padding: 20,
-                borderRadius: 12,
-                shadowColor: "#000",
-                shadowOpacity: 0.2,
-                shadowRadius: 10,
+                top: 0,
+                bottom: 0,
+                left: 0,
+                right: 0,
                 elevation: 10,
                 zIndex: 999,
+                backgroundColor: "rgba(0,0,0,.85)",
+                justifyContent: "center",
+                alignItems: "center",
               }}
             >
-              <Text
-                style={{
-                  fontFamily: theme.text,
-                  fontSize: 48,
-                  marginBottom: 10,
-                  color: theme.labelText,
-                }}
-              >
-                Select Theme
-              </Text>
               <TouchableOpacity
-                onPress={() => setTheme(mainTheme)}
+                style={StyleSheet.absoluteFillObject}
+                activeOpacity={1}
+                onPressOut={() => setShowMenu(false)}
+              />
+              <View
                 style={{
-                  borderWidth: 8,
-                  borderColor: theme.labelText,
-                  borderRadius: 8,
-                  padding: 12,
-                  marginBottom: 10,
-                  shadowColor: "#000",
-                  shadowOpacity: 0.1,
-                  shadowRadius: 4,
-                  shadowOffset: { width: 0, height: 2 },
-                  elevation: 3,
+                  width: "90%",
                   backgroundColor: theme.inputContainerBG,
+                  padding: 20,
+                  borderRadius: 12,
+                  shadowColor: "#000",
+                  shadowOpacity: 0.2,
+                  shadowRadius: 10,
+                  elevation: 10,
                 }}
               >
-                <Text style={{ fontSize: 40, color: theme.labelText, fontFamily: theme.text }}>
-                  Main Theme
+                <Text
+                  style={{
+                    fontFamily: theme.text,
+                    fontSize: 48,
+                    marginBottom: 10,
+                    color: theme.labelText,
+                  }}
+                >
+                  Select Theme
                 </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => setTheme(blackTheme)}
-                style={{
-                  borderWidth: 8,
-                  borderColor: theme.labelText,
-                  borderRadius: 8,
-                  padding: 12,
-                  marginBottom: 10,
-                  shadowColor: "#000",
-                  shadowOpacity: 0.1,
-                  shadowRadius: 4,
-                  shadowOffset: { width: 0, height: 2 },
-                  elevation: 3,
-                  backgroundColor: theme.inputContainerBG,
-                }}
-              >
-                <Text style={{ fontSize: 40, color: theme.labelText, fontFamily: theme.text }}>
-                  Dark Mode
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => setTheme(whiteTheme)}
-                style={{
-                  borderWidth: 8,
-                  borderColor: theme.labelText,
-                  borderRadius: 8,
-                  padding: 12,
-                  marginBottom: 0,
-                  shadowColor: "#000",
-                  shadowOpacity: 0.1,
-                  shadowRadius: 4,
-                  shadowOffset: { width: 0, height: 2 },
-                  elevation: 3,
-                  backgroundColor: theme.inputContainerBG,
-                }}
-              >
-                <Text style={{ fontSize: 40, color: theme.labelText, fontFamily: theme.text }}>
-                  High Visibility
-                </Text>
-              </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => setTheme(mainTheme)}
+                  style={{
+                    borderWidth: 8,
+                    borderColor: theme.labelText,
+                    borderRadius: 8,
+                    padding: 12,
+                    marginBottom: 10,
+                    shadowColor: "#000",
+                    shadowOpacity: 0.1,
+                    shadowRadius: 4,
+                    shadowOffset: { width: 0, height: 2 },
+                    elevation: 3,
+                    backgroundColor: theme.inputContainerBG,
+                  }}
+                >
+                  <Text style={{ fontSize: 40, color: theme.labelText, fontFamily: theme.text }}>
+                    Main Theme
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => setTheme(blackTheme)}
+                  style={{
+                    borderWidth: 8,
+                    borderColor: theme.labelText,
+                    borderRadius: 8,
+                    padding: 12,
+                    marginBottom: 10,
+                    shadowColor: "#000",
+                    shadowOpacity: 0.1,
+                    shadowRadius: 4,
+                    shadowOffset: { width: 0, height: 2 },
+                    elevation: 3,
+                    backgroundColor: theme.inputContainerBG,
+                  }}
+                >
+                  <Text style={{ fontSize: 40, color: theme.labelText, fontFamily: theme.text }}>
+                    Dark Mode
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => setTheme(whiteTheme)}
+                  style={{
+                    borderWidth: 8,
+                    borderColor: theme.labelText,
+                    borderRadius: 8,
+                    padding: 12,
+                    marginBottom: 0,
+                    shadowColor: "#000",
+                    shadowOpacity: 0.1,
+                    shadowRadius: 4,
+                    shadowOffset: { width: 0, height: 2 },
+                    elevation: 3,
+                    backgroundColor: theme.inputContainerBG,
+                  }}
+                >
+                  <Text style={{ fontSize: 40, color: theme.labelText, fontFamily: theme.text }}>
+                    High Visibility
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
           )}
           <View style={[styles.inputContainer, { backgroundColor: theme.inputContainerBG }]}>
