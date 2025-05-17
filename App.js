@@ -1,11 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Vibration } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Vibration, TouchableOpacity } from 'react-native';
 import { Audio } from 'expo-av';
+import { useKeepAwake, activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
+import { MaterialIcons } from '@expo/vector-icons';
+import * as Font from 'expo-font';
 
 export default function App() {
   const [totalTime, setTotalTime] = useState('30'); // minutes
-  const [runTime, setRunTime] = useState('.2'); // minutes
-  const [walkTime, setWalkTime] = useState('.2'); // minutes
+  const [runTime, setRunTime] = useState('4'); // minutes
+  const [walkTime, setWalkTime] = useState('1'); // minutes
   const [currentInterval, setCurrentInterval] = useState(null);
   const [secondsLeft, setSecondsLeft] = useState(0);
   const [elapsedTime, setElapsedTime] = useState(0);
@@ -27,6 +30,20 @@ export default function App() {
   const beep2 = require('./assets/beep2.mp3'); // countdown from walk
   const beep3 = require('./assets/beep3.mp3'); // switch to walk
   const beep4 = require('./assets/beep4.mp3'); // countdown from run
+
+  const [fontsLoaded] = Font.useFonts({
+    Rajdhani: require('./assets/fonts/Rajdhani-Regular.ttf'),
+    RajdhaniBold: require('./assets/fonts/Rajdhani-Bold.ttf'),
+  });
+  
+
+  useEffect(() => {
+    if (isRunning) {
+      activateKeepAwakeAsync();
+    } else {
+      deactivateKeepAwake();
+    }
+  }, [isRunning]);
 
   useEffect(() => {
     return soundRef.current
@@ -211,48 +228,74 @@ export default function App() {
   };
 
   return (
-    <View style={styles.container}>
-      {!isRunning && (
+    <View style={[
+      styles.container,
+      {
+        backgroundColor:
+          isPaused || !isRunning
+            ? '#ffcccc'       // soft red
+            : currentInterval?.type === 'Run'
+              ? '#ccffcc'     // soft green
+              : '#fff8cc'     // soft yellow
+      }
+    ]}>
+      {!isRunning && !isPrepping && (
         <>
-          <Text style={styles.label}>Total Time (min):</Text>
-          <TextInput style={styles.input} value={totalTime} onChangeText={setTotalTime} keyboardType="numeric" />
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Total Time (min)</Text>
+            <TextInput style={styles.input} value={totalTime} onChangeText={setTotalTime} keyboardType="numeric" />
 
-          <Text style={styles.label}>Run Time (min):</Text>
-          <TextInput style={styles.input} value={runTime} onChangeText={setRunTime} keyboardType="numeric" />
+            <Text style={styles.label}>Run Time (min)</Text>
+            <TextInput style={styles.input} value={runTime} onChangeText={setRunTime} keyboardType="numeric" />
 
-          <Text style={styles.label}>Walk Time (min):</Text>
-          <TextInput style={styles.input} value={walkTime} onChangeText={setWalkTime} keyboardType="numeric" />
-
-          <Button title="Start Timer" onPress={startTimer} />
+            <Text style={styles.label}>Walk Time (min)</Text>
+            <TextInput style={styles.input} value={walkTime} onChangeText={setWalkTime} keyboardType="numeric" />
+          </View>
+          <View style={styles.centerContent}>
+            <TouchableOpacity style={styles.startButton} onPress={startTimer}>
+              <MaterialIcons name="play-arrow" size={64} color="#1B5E20" />
+            </TouchableOpacity>
+          </View>
         </>
       )}
+
+
 
       {(isRunning || isPrepping) && currentInterval && (
         <View style={styles.timerView}>
           <Text style={styles.phaseText}>{currentInterval.type}</Text>
-          <Text style={styles.timeText}>
-            {Math.floor(secondsLeft / 60)}:{(secondsLeft % 60).toString().padStart(2, '0')}
-          </Text>
-          <Text style={styles.elapsedText}>
-            Elapsed: {Math.floor(elapsedTime / 60)}:{(elapsedTime % 60).toString().padStart(2, '0')}
-          </Text>
+          {!isPrepping && (
+            <Text style={styles.timeText}>
+              {Math.floor(secondsLeft / 60)}:{(secondsLeft % 60).toString().padStart(2, '0')}
+            </Text>
+          )}
         </View>
       )}
 
       {isRunning && (
-        <>
-          <Button
-            title={isPaused ? "Resume" : "Pause"}
+        <View style={styles.controlButtonsContainer}>
+          <TouchableOpacity
+            style={[styles.controlButton, styles.pauseButton]}
             onPress={() => setIsPaused(!isPaused)}
-          />
-          <View style={{ marginTop: 10 }}>
-            <Button
-              title="Stop / Reset"
-              onPress={resetTimer}
-              color="red"
+          >
+            <MaterialIcons
+              name={isPaused ? 'play-arrow' : 'pause'}
+              size={64}
+              color="#996700"
             />
-          </View>
-        </>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.controlButton, styles.stopButton]}
+            onPress={resetTimer}
+          >
+            <MaterialIcons name="stop" size={64} color="#8B0000" />
+          </TouchableOpacity>
+
+          <Text style={styles.elapsedText}>
+            {Math.floor(elapsedTime / 60)}:{(elapsedTime % 60).toString().padStart(2, '0')}
+          </Text>
+        </View>
       )}
     </View>
   );
@@ -262,35 +305,110 @@ const styles = StyleSheet.create({
   container: {
     paddingTop: 80,
     paddingHorizontal: 20,
-    backgroundColor: '#fff',
     flex: 1,
+    alignItems: 'center',
   },
   label: {
-    fontSize: 18,
+    fontSize: 42,
     marginTop: 10,
+    color: '#ffcccc',
+    marginBottom: 15,
+    textAlign: 'center',
+    fontFamily: "RajdhaniBold",
+  },
+  inputContainer: {
+    backgroundColor: '#800000',
+    padding: 20,
+    borderRadius: 16,
+    marginTop: 40,
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 6,
+    width: '100%',
+    alignSelf: 'center',
+    alignItems: 'center',
   },
   input: {
-    borderBottomWidth: 1,
-    fontSize: 18,
-    paddingVertical: 4,
-    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 10,
+    padding: 10,
+    fontSize: 42,
+    marginBottom: 15,
+    backgroundColor: '#ffcccc',
+    width: 180,
+    textAlign: 'center',
+    fontFamily: "RajdhaniBold",
   },
   timerView: {
     alignItems: 'center',
     marginTop: 100,
   },
   phaseText: {
-    fontSize: 32,
-    fontWeight: 'bold',
+    fontSize: 72,
+    // fontWeight: 'bold',
+    fontFamily: "RajdhaniBold",
   },
   timeText: {
-    fontSize: 48,
-    fontWeight: 'bold',
+    fontSize: 72,
+    // fontWeight: 'bold',
     marginTop: 20,
+    fontFamily: "RajdhaniBold",
   },
   elapsedText: {
-    fontSize: 20,
-    marginTop: 10,
-    color: 'gray',
+    fontSize: 72,
+    marginTop: 20,
+    // fontWeight: 'bold',
+    color: '#222',
+    fontFamily: "RajdhaniBold",
+  },
+  startButton: {
+    width: '100%',
+    height: 150,
+    borderRadius: 16,
+    backgroundColor: '#81C784', // darker green
+    justifyContent: 'center',
+    alignItems: 'center',
+    alignSelf: 'center',
+  },
+  startButtonText: {
+    color: 'white',
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  centerContent: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+  },
+  controlButtonsContainer: {
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 30,
+    marginTop: 60,
+    width: '100%',
+  },
+  controlButton: {
+    width: '100%',
+    height: 150,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  pauseButton: {
+    backgroundColor: '#FFD54F', // darker yellow
+  },
+  stopButton: {
+    backgroundColor: '#EF9A9A', // darker red
+  },
+  controlButtonText: {
+    color: 'white',
+    fontSize: 18,
+    // fontWeight: 'bold',
+    fontFamily: "RajdhaniBold",
   },
 });
