@@ -72,10 +72,10 @@ MIT License
 ## Screenshots
 
 ### Home Screen
-![Home Screen](screenshots/home.png)
+<img src="screenshots/home.png" alt="Home Screen" width="300" />
 
 ### Run Screen
-![Run Screen](screenshots/run-timer.png)
+<img src="screenshots/run-timer.png" alt="Run Screen" width="300" />
 
 ### Walk Screen
-![Walk Screen](screenshots/walk-timer.png)
+<img src="screenshots/walk-timer.png" alt="Walk Screen" width="300" />
