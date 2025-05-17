@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   View,
   Text,
@@ -18,24 +19,66 @@ import * as Font from "expo-font";
 import { mainTheme, blackTheme, whiteTheme } from "./utils/themes";
 
 export default function App() {
-  const [totalTime, setTotalTime] = useState("30"); // minutes
-  const [runTime, setRunTime] = useState("4"); // minutes
-  const [walkTime, setWalkTime] = useState("1"); // minutes
+  const [totalTime, setTotalTime] = useState(""); // minutes
+  const [runTime, setRunTime] = useState(""); // minutes
+  const [walkTime, setWalkTime] = useState(""); // minutes
   const [currentInterval, setCurrentInterval] = useState(null);
   const [secondsLeft, setSecondsLeft] = useState(0);
   const [elapsedTime, setElapsedTime] = useState(0);
+  const [runElapsedTime, setRunElapsedTime] = useState(0); // NEW STATE for total run time
   const [isRunning, setIsRunning] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [isPrepping, setIsPrepping] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [theme, setTheme] = useState(mainTheme);
+  const [isThemeLoaded, setIsThemeLoaded] = useState(false);
   const intervalRef = useRef(null);
   const countdownTimersRef = useRef([]);
   const currentIntervalIndex = useRef(0);
 
   const isPausedRef = useRef(isPaused);
   const currentIntervalRef = useRef(null);
+  // Load stored settings for theme and timer values
+  useEffect(() => {
+    const loadStoredValues = async () => {
+      try {
+        const savedTheme = await AsyncStorage.getItem("selectedTheme");
+        if (savedTheme === "black") setTheme(blackTheme);
+        else if (savedTheme === "white") setTheme(whiteTheme);
+        else if (savedTheme === "maroon") setTheme(mainTheme);
+        else setTheme(mainTheme);
+
+        const savedTotal = await AsyncStorage.getItem("lastTotalTime");
+        const savedRun = await AsyncStorage.getItem("lastRunTime");
+        const savedWalk = await AsyncStorage.getItem("lastWalkTime");
+
+        if (savedTotal) setTotalTime(savedTotal);
+        if (savedRun) setRunTime(savedRun);
+        if (savedWalk) setWalkTime(savedWalk);
+      } catch (e) {
+        console.log("Error loading saved values:", e);
+      }
+      setIsThemeLoaded(true);
+    };
+    loadStoredValues();
+  }, []);
+
+  // Save theme selection
+  const saveTheme = async (themeName) => {
+    try {
+      await AsyncStorage.setItem("selectedTheme", themeName);
+    } catch (e) {}
+  };
+
+  // Save timer values
+  const saveTimeSettings = async () => {
+    try {
+      await AsyncStorage.setItem("lastTotalTime", totalTime);
+      await AsyncStorage.setItem("lastRunTime", runTime);
+      await AsyncStorage.setItem("lastWalkTime", walkTime);
+    } catch (e) {}
+  };
 
   // Load transition sound
   const soundRef = useRef(null);
@@ -158,8 +201,16 @@ export default function App() {
 
   const startTimer = () => {
     if (isRunning || isPrepping) return; // prevent duplicate timers
+
+    // Input validation
+    if (!totalTime || !runTime || !walkTime) {
+      alert("Please fill out all time fields before starting the timer.");
+      return;
+    }
+
+    saveTimeSettings();
     preStartCountdown();
-    setShowMenu(false)
+    setShowMenu(false);
   };
 
   const startMainTimer = () => {
@@ -221,7 +272,11 @@ export default function App() {
 
         return newTime;
       });
+      // INCREMENT elapsedTime always, and runElapsedTime only during "Run"
       setElapsedTime((et) => et + 1);
+      if (currentIntervalRef.current?.type === "Run") {
+        setRunElapsedTime((rt) => rt + 1);
+      }
     }, 1000);
   };
 
@@ -242,9 +297,14 @@ export default function App() {
     setIsPrepping(false);
     setSecondsLeft(0);
     setElapsedTime(0);
+    setRunElapsedTime(0);
     setCurrentInterval(null);
     currentIntervalIndex.current = 0;
   };
+
+  if (!isThemeLoaded || !fontsLoaded) {
+    return null;
+  }
 
   return (
     <View
@@ -299,11 +359,13 @@ export default function App() {
                   width: "90%",
                   backgroundColor: theme.inputContainerBG,
                   padding: 20,
+                  paddingBottom: 38,
                   borderRadius: 12,
                   shadowColor: "#000",
                   shadowOpacity: 0.2,
                   shadowRadius: 10,
                   elevation: 10,
+                  gap: 22
                 }}
               >
                 <Text
@@ -317,9 +379,12 @@ export default function App() {
                   Select Theme
                 </Text>
                 <TouchableOpacity
-                  onPress={() => setTheme(mainTheme)}
+                  onPress={() => {
+                    setTheme(mainTheme);
+                    saveTheme("maroon");
+                  }}
                   style={{
-                    borderWidth: 8,
+                    borderWidth: 4,
                     borderColor: theme.labelText,
                     borderRadius: 8,
                     padding: 12,
@@ -337,9 +402,12 @@ export default function App() {
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  onPress={() => setTheme(blackTheme)}
+                  onPress={() => {
+                    setTheme(blackTheme);
+                    saveTheme("black");
+                  }}
                   style={{
-                    borderWidth: 8,
+                    borderWidth: 4,
                     borderColor: theme.labelText,
                     borderRadius: 8,
                     padding: 12,
@@ -357,9 +425,12 @@ export default function App() {
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  onPress={() => setTheme(whiteTheme)}
+                  onPress={() => {
+                    setTheme(whiteTheme);
+                    saveTheme("white");
+                  }}
                   style={{
-                    borderWidth: 8,
+                    borderWidth: 4,
                     borderColor: theme.labelText,
                     borderRadius: 8,
                     padding: 12,
@@ -454,47 +525,48 @@ export default function App() {
 
       {isRunning && (
         <View style={styles.controlButtonsContainer}>
-          {!isLocked && (
-            <>
-              <TouchableOpacity
-                style={[
-                  styles.controlButton,
-                  {
-                    backgroundColor: theme.pauseButtonBG,
-                    shadowColor: theme.buttonShadowColor,
-                    shadowOpacity: theme.buttonShadowOpacity,
-                    shadowRadius: theme.buttonShadowRadius,
-                    shadowOffset: theme.buttonShadowOffset,
-                    elevation: theme.buttonElevation,
-                  },
-                ]}
-                onPress={() => setIsPaused(!isPaused)}
-              >
-                <MaterialIcons
-                  name={isPaused ? "play-arrow" : "pause"}
-                  size={64}
-                  color={theme.iconPause}
-                />
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[
-                  styles.controlButton,
-                  {
-                    backgroundColor: theme.stopButtonBG,
-                    shadowColor: theme.buttonShadowColor,
-                    shadowOpacity: theme.buttonShadowOpacity,
-                    shadowRadius: theme.buttonShadowRadius,
-                    shadowOffset: theme.buttonShadowOffset,
-                    elevation: theme.buttonElevation,
-                  },
-                ]}
-                onPress={resetTimer}
-              >
-                <MaterialIcons name="stop" size={64} color={theme.iconStop} />
-              </TouchableOpacity>
-            </>
-          )}
+          <TouchableOpacity
+            style={[
+              styles.controlButton,
+              {
+                backgroundColor: theme.pauseButtonBG,
+                shadowColor: theme.buttonShadowColor,
+                shadowOpacity: theme.buttonShadowOpacity,
+                shadowRadius: theme.buttonShadowRadius,
+                shadowOffset: theme.buttonShadowOffset,
+                elevation: theme.buttonElevation,
+                marginBottom: 30,
+                opacity: isLocked ? 0.3 : 1,
+              },
+            ]}
+            onPress={() => !isLocked && setIsPaused(!isPaused)}
+            disabled={isLocked}
+          >
+            <MaterialIcons
+              name={isPaused ? "play-arrow" : "pause"}
+              size={64}
+              color={theme.iconPause}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.controlButton,
+              {
+                backgroundColor: theme.stopButtonBG,
+                shadowColor: theme.buttonShadowColor,
+                shadowOpacity: theme.buttonShadowOpacity,
+                shadowRadius: theme.buttonShadowRadius,
+                shadowOffset: theme.buttonShadowOffset,
+                elevation: theme.buttonElevation,
+                marginBottom: 30,
+                opacity: isLocked ? 0.3 : 1,
+              },
+            ]}
+            onPress={() => !isLocked && resetTimer()}
+            disabled={isLocked}
+          >
+            <MaterialIcons name="stop" size={64} color={theme.iconStop} />
+          </TouchableOpacity>
           <TouchableOpacity
             style={[
               styles.controlButton,
@@ -516,8 +588,8 @@ export default function App() {
               color={theme.iconLock}
             />
           </TouchableOpacity>
-          <Text style={[styles.elapsedText, { color: theme.textColor, fontFamily: theme.text }]}>
-            {Math.floor(elapsedTime / 60)}:
+          <Text style={[styles.elapsedText, { color: theme.textColor, fontFamily: theme.text, }]}>
+            {Math.floor(runElapsedTime / 60)}:{(runElapsedTime % 60).toString().padStart(2, "0")} / {Math.floor(elapsedTime / 60)}:
             {(elapsedTime % 60).toString().padStart(2, "0")}
           </Text>
         </View>
@@ -580,7 +652,7 @@ const styles = StyleSheet.create({
   },
   startButton: {
     width: "100%",
-    height: 150,
+    height: 125,
     borderRadius: 16,
     justifyContent: "center",
     alignItems: "center",
@@ -602,7 +674,7 @@ const styles = StyleSheet.create({
   },
   controlButton: {
     width: "100%",
-    height: 150,
+    height: 125,
     borderRadius: 16,
     justifyContent: "center",
     alignItems: "center",
