@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   View,
   Text,
@@ -18,9 +19,9 @@ import * as Font from "expo-font";
 import { mainTheme, blackTheme, whiteTheme } from "./utils/themes";
 
 export default function App() {
-  const [totalTime, setTotalTime] = useState("30"); // minutes
-  const [runTime, setRunTime] = useState("4"); // minutes
-  const [walkTime, setWalkTime] = useState("1"); // minutes
+  const [totalTime, setTotalTime] = useState(""); // minutes
+  const [runTime, setRunTime] = useState(""); // minutes
+  const [walkTime, setWalkTime] = useState(""); // minutes
   const [currentInterval, setCurrentInterval] = useState(null);
   const [secondsLeft, setSecondsLeft] = useState(0);
   const [elapsedTime, setElapsedTime] = useState(0);
@@ -31,12 +32,53 @@ export default function App() {
   const [isLocked, setIsLocked] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [theme, setTheme] = useState(mainTheme);
+  const [isThemeLoaded, setIsThemeLoaded] = useState(false);
   const intervalRef = useRef(null);
   const countdownTimersRef = useRef([]);
   const currentIntervalIndex = useRef(0);
 
   const isPausedRef = useRef(isPaused);
   const currentIntervalRef = useRef(null);
+  // Load stored settings for theme and timer values
+  useEffect(() => {
+    const loadStoredValues = async () => {
+      try {
+        const savedTheme = await AsyncStorage.getItem("selectedTheme");
+        if (savedTheme === "black") setTheme(blackTheme);
+        else if (savedTheme === "white") setTheme(whiteTheme);
+        else if (savedTheme === "maroon") setTheme(mainTheme);
+        else setTheme(mainTheme);
+
+        const savedTotal = await AsyncStorage.getItem("lastTotalTime");
+        const savedRun = await AsyncStorage.getItem("lastRunTime");
+        const savedWalk = await AsyncStorage.getItem("lastWalkTime");
+
+        if (savedTotal) setTotalTime(savedTotal);
+        if (savedRun) setRunTime(savedRun);
+        if (savedWalk) setWalkTime(savedWalk);
+      } catch (e) {
+        console.log("Error loading saved values:", e);
+      }
+      setIsThemeLoaded(true);
+    };
+    loadStoredValues();
+  }, []);
+
+  // Save theme selection
+  const saveTheme = async (themeName) => {
+    try {
+      await AsyncStorage.setItem("selectedTheme", themeName);
+    } catch (e) {}
+  };
+
+  // Save timer values
+  const saveTimeSettings = async () => {
+    try {
+      await AsyncStorage.setItem("lastTotalTime", totalTime);
+      await AsyncStorage.setItem("lastRunTime", runTime);
+      await AsyncStorage.setItem("lastWalkTime", walkTime);
+    } catch (e) {}
+  };
 
   // Load transition sound
   const soundRef = useRef(null);
@@ -159,8 +201,16 @@ export default function App() {
 
   const startTimer = () => {
     if (isRunning || isPrepping) return; // prevent duplicate timers
+
+    // Input validation
+    if (!totalTime || !runTime || !walkTime) {
+      alert("Please fill out all time fields before starting the timer.");
+      return;
+    }
+
+    saveTimeSettings();
     preStartCountdown();
-    setShowMenu(false)
+    setShowMenu(false);
   };
 
   const startMainTimer = () => {
@@ -252,6 +302,10 @@ export default function App() {
     currentIntervalIndex.current = 0;
   };
 
+  if (!isThemeLoaded || !fontsLoaded) {
+    return null;
+  }
+
   return (
     <View
       style={[
@@ -325,7 +379,10 @@ export default function App() {
                   Select Theme
                 </Text>
                 <TouchableOpacity
-                  onPress={() => setTheme(mainTheme)}
+                  onPress={() => {
+                    setTheme(mainTheme);
+                    saveTheme("maroon");
+                  }}
                   style={{
                     borderWidth: 4,
                     borderColor: theme.labelText,
@@ -345,7 +402,10 @@ export default function App() {
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  onPress={() => setTheme(blackTheme)}
+                  onPress={() => {
+                    setTheme(blackTheme);
+                    saveTheme("black");
+                  }}
                   style={{
                     borderWidth: 4,
                     borderColor: theme.labelText,
@@ -365,7 +425,10 @@ export default function App() {
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  onPress={() => setTheme(whiteTheme)}
+                  onPress={() => {
+                    setTheme(whiteTheme);
+                    saveTheme("white");
+                  }}
                   style={{
                     borderWidth: 4,
                     borderColor: theme.labelText,
