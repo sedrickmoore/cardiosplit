@@ -199,7 +199,9 @@ export default function App() {
       {(isRunning || isPrepping) && currentInterval && (
         <View style={styles.timerView}>
           <Text style={styles.phaseText}>{currentInterval.type}</Text>
-          <Text style={styles.timeText}>{secondsLeft}s</Text>
+          <Text style={styles.timeText}>
+            {Math.floor(secondsLeft / 60)}:{(secondsLeft % 60).toString().padStart(2, '0')}
+          </Text>
           <Text style={styles.elapsedText}>
             Elapsed: {Math.floor(elapsedTime / 60)}:{(elapsedTime % 60).toString().padStart(2, '0')}
           </Text>
