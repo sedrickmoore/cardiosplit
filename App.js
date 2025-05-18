@@ -162,12 +162,17 @@ export default function App() {
       timeRemaining -= runSeconds + walkSeconds;
     }
 
-    if (timeRemaining >= runSeconds) {
+    // New logic for remaining time:
+    if (timeRemaining >= runSeconds + walkSeconds) {
+      // already handled by while loop
+    } else if (timeRemaining >= runSeconds) {
       intervals.push({ type: "Run", duration: runSeconds });
       timeRemaining -= runSeconds;
-    }
-    if (timeRemaining > 0) {
-      intervals.push({ type: "Walk", duration: timeRemaining });
+      if (timeRemaining > 0) {
+        intervals.push({ type: "Walk", duration: timeRemaining });
+      }
+    } else if (timeRemaining > 0) {
+      intervals.push({ type: "Run", duration: timeRemaining });
     }
 
     return intervals;
@@ -225,8 +230,15 @@ export default function App() {
     const runInterval = () => {
       if (currentIntervalIndex.current >= intervals.length) {
         clearInterval(intervalRef.current);
-        setCurrentInterval({ type: "Done", duration: 0 });
+        stopSilentAudio();
         setIsRunning(false);
+        setIsPaused(false);
+        setIsPrepping(false);
+        setSecondsLeft(0);
+        setElapsedTime(0);
+        setRunElapsedTime(0);
+        setCurrentInterval({ type: "Done", duration: 0 });
+        currentIntervalIndex.current = 0;
         return;
       }
 
