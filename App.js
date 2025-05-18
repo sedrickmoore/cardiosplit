@@ -231,14 +231,14 @@ export default function App() {
     const runInterval = () => {
       if (currentIntervalIndex.current >= intervals.length) {
         clearInterval(intervalRef.current);
+        intervalRef.current = null;
         stopSilentAudio();
         setIsRunning(false);
         setIsPaused(false);
         setIsPrepping(false);
         setSecondsLeft(0);
-        // Do NOT reset elapsedTime or runElapsedTime here so we can show summary
         setCurrentInterval({ type: "Done", duration: 0 });
-        setSessionComplete(true); // Mark session as complete for summary
+        setSessionComplete(true);
         currentIntervalIndex.current = 0;
         return;
       }
@@ -260,7 +260,7 @@ export default function App() {
     runInterval();
 
     intervalRef.current = setInterval(() => {
-      if (isPausedRef.current) return;
+      if (isPausedRef.current || sessionComplete) return;
 
       setSecondsLeft((prev) => {
         const newTime = prev - 1;
@@ -294,7 +294,19 @@ export default function App() {
   };
 
   const resetTimer = () => {
+    // Always clear interval and stop silent audio immediately
     clearInterval(intervalRef.current);
+    intervalRef.current = null;
+    stopSilentAudio();
+    // If timer is stopped mid-session (not at the end), show summary screen instead of resetting everything
+    if (elapsedTime > 0 && !sessionComplete) {
+      setIsRunning(false);
+      setIsPaused(false);
+      setIsPrepping(false);
+      setCurrentInterval(null);
+      setSessionComplete(true);
+      return;
+    }
     countdownTimersRef.current.forEach(clearTimeout);
     // Ensure any playing sound is unloaded
     (() => {
@@ -304,7 +316,6 @@ export default function App() {
         });
       }
     })();
-    stopSilentAudio();
     setIsRunning(false);
     setIsPaused(false);
     setIsPrepping(false);
